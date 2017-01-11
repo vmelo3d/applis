@@ -1,0 +1,70 @@
+<script type="text/javascript">
+
+	$('a#sair').click(function(){
+		return false;
+	});
+	
+	function status(res){
+		if (res.status === "connected") {
+			$('#entrar').hide();
+			$('#perfil').show();
+			testApi();
+		}else{
+			$('#entrar').show();
+			$('#perfil').hide();
+		}
+	}
+
+	window.fbAsyncInit = function() {
+	    FB.init({
+	      appId      : '242255592888153',
+	      xfbml      : true,
+	      cookie     : true,
+	      version    : 'v2.8'
+	    });
+
+	    FB.getLoginStatus(function(res){
+	    	status(res);
+	    });
+  	};
+
+  	(function(d, s, id){
+     var js, fjs = d.getElementsByTagName(s)[0];
+     if (d.getElementById(id)) {return;}
+     js = d.createElement(s); js.id = id;
+     js.src = "//connect.facebook.net/en_US/sdk.js";
+     fjs.parentNode.insertBefore(js, fjs);
+   }(document, 'script', 'facebook-jssdk'));
+
+  	function testApi(){
+  		FB.api('/me', {fields: 'email,name,id,picture.width(60).height(60)'},function(res){
+  			console.log(res);
+  			$('section#perfil h3').html(res.name);
+  			$('section#perfil span#facemail').html(res.email);
+  			$('section#perfil img').attr('src',res.picture.data.url);
+
+  			$.ajax({
+  				type: 'POST',
+  				url: 'valida/cadastro.php',
+  				data: {
+  					email: res.email,
+  					nome: res.name,
+  					avatar: res.picture.data.url
+  				}
+  			});
+  		});
+  	}
+
+  	function logOut(){
+  		FB.logout(function(res){
+  			status(res);
+  		});
+  	}
+
+  	function login(){
+  		FB.login(function(res){
+  			status(res);
+  		}, {scope: 'email'});
+  	}
+
+</script>
